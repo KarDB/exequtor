@@ -1,0 +1,8 @@
+---
+M_1:
+  base_file: EoSense_sync.yaml
+  sweep_params:
+    - "['pulse_sequence']['readout_time']"
+  sweep_vals:
+    - "1,20,19"
+  target: SNR

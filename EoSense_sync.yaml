@@ -1,0 +1,82 @@
+---
+experiment_type: Sync
+
+# Devices
+sensor:
+  type: "EoSense1.1CXP"
+  config:
+    number_measurements: &nframes 18000
+    target_data_type: uint32
+    image_roi:
+      - 100      # height
+      - 192      # width
+      - 560      # xoffs
+      - 272      # yoffs
+      # - 500  # height
+      # - 896  # width
+      # - 352  # xoffs
+      # - 248  # yoffs
+    GenTL_producer_cti: '/home/karl/Documents/Programms/egrabber/egrabber-linux-x86_64-22.10.1.45/lib/x86_64/coaxlink.cti'
+
+averages: 1
+
+synchroniser:
+  type: 'TekAWG'
+  config:
+    address: 'TCPIP::10.152.211.239::INSTR'
+    sampling_rate: 5.0e9  # samples
+    # analog_mixing_freq: 500.0e6 # Hz
+  channel_mapping:
+    MW_I: 0
+    LASER: 1
+    PROTON_PULSE: 3
+    MW_Q: 5
+    CAMERA_VOLUME_TRIGGER: 6
+    READ: 7
+    FAKE_SIGNAL: 8
+    SMB_SWITCH: 9
+
+
+dynamic_steps: &n_dynamic_steps 1
+dynamic_devices:
+static_devices:
+  mw_source:
+    address: 'TCPIP::10.152.211.108::INSTR'
+    device_type: 'SMB'
+    channels:
+      channel_1:
+        amplitude: 10
+        frequency: 4.714e9
+  rf_source:
+    address: 'TCPIP::10.152.211.175::INSTR'
+    device_type: 'Rigol'
+    channels:
+      channel_2:
+        amplitude: 0.025
+        frequency: 3562253  # 1000 Hz offset
+        # frequency: 3561653  # 400 Hz offset
+
+# Data
+data:
+  averaging_mode: 'spread'
+  dynamic_steps: *n_dynamic_steps
+  compress: true
+
+# Pulse Sequence
+ps_path: './ps_sequences/eo_sense_sync.py'
+pulse_sequence:
+  seq_type: 'XY8'
+  N: 15
+  tau: 0.0702
+  pi_half: 0.0248
+  pi: 0.0496
+  readout_phase: 0
+  mixing_frequency: 500e6
+  laserduration: 16
+  readout_time: 13
+  frames: *nframes
+  max_framerate: 18000
+  sampling_rate: 5e9
+
+# Metadata
+metadata_id: 9efd9f83-07dd-40b2-863a-2eebd2454eae
