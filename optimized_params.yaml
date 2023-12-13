@@ -1,0 +1,9 @@
+static_devices:
+  mw_source:
+    channels:
+      channel_1:
+        frequency: 4.8e9
+
+
+pulse_sequence:
+  N: 10

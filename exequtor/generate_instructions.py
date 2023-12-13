@@ -12,6 +12,8 @@ yaml.preserve_quotes = True
 
 filename = 'optmeasurement.yml'
 saveplace_busy_document = 'status.txt'   #'/home/karl/.qupyt/status.txt'
+saveplace_optimization_status_document = 'status_optimization.txt'
+saveplace_optimized_params = 'optimized_params.yaml'
 
 def wait_while_busy():
     wait = True
@@ -21,6 +23,20 @@ def wait_while_busy():
             if text == 'ready\n' or text == 'ready':
                 wait = False
             sleep(1)
+
+def wait_while_optimization():
+    wait = True
+    while wait:
+        with open(saveplace_optimization_status_document, 'r') as file:
+            text = file.read()
+            if text == 'finished\n' or text == 'finished':
+                wait = False
+            sleep(1)
+
+def change_status_optimization(new_status:str):
+    with open(saveplace_optimization_status_document, 'w') as file:
+            file.write(new_status)
+
 
 def round_to_n(value:float, n:int) -> float:
      value_rounded = round(value, -int(floor(log10(value))) + (n - 1))
@@ -35,6 +51,16 @@ def generate_values_for_string_function(expression:str, lower:float, upper:float
     return y_values_updated
 
 
+def update_params_between_two_notebooks(source:Dict[str, Any], target:Dict[str, Any]):
+    for key, value in source.items():
+        if isinstance(value, dict) and key in target and isinstance(target[key], dict):
+            # Recursively update nested dictionaries
+            update_params_between_two_notebooks(value, target[key])
+        elif key in target:
+            # Update parameter if the key exists in the target dictionary
+            target[key] = value
+
+
 class ExecutionBlock:
     def __init__(self, base_file: str, sweep_params: List[str], sweep_vals: List[str]):
         self.base_file = base_file
@@ -45,6 +71,9 @@ class ExecutionBlock:
 
     def assign_params(self,params):
         self.params = params
+
+    def update_parameters(self, update_params:Dict[str, Any]):
+        update_params_between_two_notebooks(update_params, self.params)
 
     def assign_functions(self, sweep_functions):
         self.sweep_functions = sweep_functions
@@ -85,7 +114,6 @@ class ExecutionBlock:
                 if hasattr(self, 'sweep_functions') and self.sweep_functions[i] != 'linear':
                     vals = generate_values_for_string_function(self.sweep_functions[i],
                                         float(rangevals[0]), float(rangevals[1]), number_sweep_values)
-                    print('The function is taken into account')
                 else:
                     vals = np.linspace(float(rangevals[0]), float(rangevals[1]), number_sweep_values)
                 for k, val in enumerate(vals):
@@ -99,10 +127,16 @@ class ExecutionBlock:
 
 
 
-def make_yaml_files_for_sweeps(filename:str, saveplace_busy_document:str):
+def make_yaml_files_for_sweeps(filename:str,
+                                saveplace_busy_document:str,
+                                saveplace_optimization_status_document:str,
+                                saveplace_optimized_params:str):
     with open(filename, 'r', encoding='utf-8') as file:
         filedata = yaml.load(file)
         for i, key in enumerate(filedata.keys()):
+            wait_while_optimization()
+            with open(saveplace_optimized_params, 'r', encoding='utf-8') as update_file:
+                update_params = yaml.load(update_file)
             if 'sweep_params' in filedata[key]:
 
                 execution_block = ExecutionBlock(filedata[key]['base_file'],
@@ -115,6 +149,7 @@ def make_yaml_files_for_sweeps(filename:str, saveplace_busy_document:str):
                 with open(execution_block.base_file, 'r', encoding='utf-8') as p:
                     params = yaml.load(p)
                     execution_block.assign_params(params)
+                    execution_block.update_parameters(update_params)
                     for j in range(np.shape(rangevals)[1]): #loops through every value-update-block
                         wait_while_busy()
                         value_name_for_save = ''
@@ -127,9 +162,13 @@ def make_yaml_files_for_sweeps(filename:str, saveplace_busy_document:str):
             else:
                 with open(filedata[key]['base_file'], 'r', encoding='utf-8') as p:
                     params = yaml.load(p)
+                    update_params_between_two_notebooks(update_params, params)
                     savename = filedata[key]['base_file']
                     with open('dumpjamls/'+savename, 'w', encoding='utf-8') as file:
                             yaml.dump(params, file)
+            change_status_optimization('finished') #change for final version!!
+            print('Finished generating one execution block.')
+
 
 if __name__ == '__main__':
-    make_yaml_files_for_sweeps(filename, saveplace_busy_document)
+    make_yaml_files_for_sweeps(filename, saveplace_busy_document, saveplace_optimization_status_document, saveplace_optimized_params)

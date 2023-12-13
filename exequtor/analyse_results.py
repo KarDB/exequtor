@@ -1,7 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import generate_instructions.py as gi
 
 folderwithdata = 'datafolder/'
+
+def safe_optimized_parameter()
+
+gi.change_status_optimization('finished')
+
+
+
 
 
 sweep_val = []
