@@ -1,6 +1,5 @@
 #import yaml
 import numpy as np
-
 import ruamel.yaml
 #from ruamel.yaml import YAML, YAMLError
 import numpy as np
@@ -12,8 +11,8 @@ from math import log10, floor
 yaml = ruamel.yaml.YAML(typ = 'safe')
 yaml.preserve_quotes = True
 
-filename = 'optmeasurement.yml'
-saveplace_busy_document = 'status.txt'   #'/home/karl/.qupyt/status.txt'
+#filename = 'optmeasurement.yml'
+#saveplace_busy_document = 'status.txt'   #'/home/karl/.qupyt/status.txt'
 
 def wait_while_busy():
     wait = True
@@ -43,7 +42,7 @@ class ExecutionBlock:
         param_name = ''
         for i in range(len(self.sweep_params)):
             param_name += '_' + self.sweep_params[i].split("']")[-2].split("['")[-1]
-        savename = 'Sync_sweep' + param_name + value
+        savename = 'Sync-sweep' + param_name + value
         return savename
 
     def write_yaml_file(self, savename: str) -> None:
@@ -56,7 +55,7 @@ class ExecutionBlock:
         vals = np.linspace(float(rangevals[0]), float(rangevals[1]), int(rangevals[2]))
         return vals
 
-    def make_range_sweep_value_all(self): ## Add correct format -> Array[float]:
+    def make_range_sweep_value_all(self) -> np.ndarray:
         number_parallelsweepvals = len(self.sweep_params)
         number_sweep_values = len(self.make_range_sweep_value_single(0))
         individual_sweep_vals = np.zeros((number_parallelsweepvals, number_sweep_values))
@@ -66,21 +65,25 @@ class ExecutionBlock:
                 individual_sweep_vals[i,k] = val
         return individual_sweep_vals
 
-with open(filename, 'r', encoding='utf-8') as file:
-    filedata = yaml.load(file)
-    for i, key in enumerate(filedata.keys()):
-        execution_block = ExecutionBlock(filedata[key]['base_file'],
-                                 filedata[key]['sweep_params'],
-                                 filedata[key]['sweep_vals'])
-        rangevals = execution_block.make_range_sweep_value_all()
-        with open(execution_block.base_file, 'r', encoding='utf-8') as p:
-            params = yaml.load(p)
-            execution_block.assign_params(params)
-            for j in range(np.shape(rangevals)[1]):
-                wait_while_busy()
-                value_name_for_save = ''
-                for k in range(len(execution_block.sweep_params)):
-                    exec('execution_block.params'+execution_block.sweep_params[k]+f' = {rangevals[k,j]}')
-                    value_name_for_save += '_' + str(round_to_n(rangevals[k,j], 8))
-                savename = execution_block.generate_precise_name(value_name_for_save)
-                execution_block.write_yaml_file(savename+'.yaml')
+
+#if __name__ == '__main__:'
+def make_yaml_files_for_sweeps(filename:str, saveplace_busy_document:str):
+    with open(filename, 'r', encoding='utf-8') as file:
+        filedata = yaml.load(file)
+        for i, key in enumerate(filedata.keys()):
+            execution_block = ExecutionBlock(filedata[key]['base_file'],
+                                    filedata[key]['sweep_params'],
+                                    filedata[key]['sweep_vals'])
+            rangevals = execution_block.make_range_sweep_value_all()
+            with open(execution_block.base_file, 'r', encoding='utf-8') as p:
+                params = yaml.load(p)
+                execution_block.assign_params(params)
+                for j in range(np.shape(rangevals)[1]):
+                    wait_while_busy()
+                    value_name_for_save = ''
+                    for k in range(len(execution_block.sweep_params)):
+                        exec('execution_block.params'+execution_block.sweep_params[k]+f' = {rangevals[k,j]}')
+                        value_name_for_save += '_' + str(round_to_n(rangevals[k,j], 8))
+                    savename = execution_block.generate_precise_name(value_name_for_save)
+                    execution_block.params['experiment_type'] = savename
+                    execution_block.write_yaml_file(savename+'.yaml')

@@ -7,7 +7,7 @@ name = 'exequtor'
 version = '0.1.0'
 description = 'Run automated measurement sweeps'
 license = {text = 'No license of for commercial or non-commercial use is granted'}
-dependencies = [
+dependencies = ['numpy', 'ruamel.yaml'
 ]
 #author = 'Karl Briegel'
 #author_email = 'karl.briegel@tum.de'
