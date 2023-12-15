@@ -1,10 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import generate_instructions.py as gi
+from datetime import datetime
 
 folderwithdata = 'datafolder/'
 
 def safe_optimized_parameter()
+    savename_optimized_parameters = "Optimized_parameters_ + datetime.today().strftime("%Y-%m-%d-%H-%M-%S")
 
 gi.change_status_optimization('finished')
 
