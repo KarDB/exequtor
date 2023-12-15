@@ -1,0 +1,26 @@
+---
+M_1:
+  base_file: instructions/EoSense_NMR.yaml
+  sweep_params:
+    - "['static_devices']['rf_source']['channels']['channel_1']['frequency']"
+    - "['static_devices']['mw_source']['channels']['channel_1']['overhauser_freq']"
+  sweep_vals:
+    - "3561000;3565000;9"
+    - "2.34394844e9;2.34658135e9;9"
+  target: SNR
+
+M_2:
+  base_file: EoSense_sync.yaml
+  sweep_params:
+    - "['pulse_sequence']['proton_pulse_duration']"
+  sweep_vals:
+    - "100,1000,19"
+  target: SNR
+
+M_3:
+  base_file: EoSense_sync.yaml
+  sweep_params:
+    - "['static_devices']['rf_source']['channels']['channel_1']['amplitude']"
+  sweep_vals:
+    - "0.1;0.4;7"
+  target: SNR
