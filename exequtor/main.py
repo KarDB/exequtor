@@ -29,6 +29,7 @@ def main():
                 optimized_params = {}
                 for key in filedata.keys():
                     make_yaml_files_for_sweeps(filedata, key, optimized_params)
+                    input("Klick enter to proceed with the next measurement look")
                 #save_optimized_values()
         case 'start_analysis':
             pass
