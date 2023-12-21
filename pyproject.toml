@@ -7,7 +7,10 @@ name = 'exequtor'
 version = '0.1.0'
 description = 'Run automated measurement sweeps'
 license = {text = 'No license of for commercial or non-commercial use is granted'}
-dependencies = ['numpy', 'ruamel.yaml'
+dependencies = [
+'numpy', 
+'ruamel.yaml',
+'sympy'
 ]
 #author = 'Karl Briegel'
 #author_email = 'karl.briegel@tum.de'
@@ -16,7 +19,7 @@ dependencies = ['numpy', 'ruamel.yaml'
 find = {}
 
 [project.scripts]
-qupyt = "exequtor:entry"
+exequtor = "exequtor.main:main"
 
 [tool.mypy]
 check_untyped_defs = true
