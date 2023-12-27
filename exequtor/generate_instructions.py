@@ -201,8 +201,9 @@ def make_yaml_files_for_sweeps(filedata: Dict[str, Any],
                     value_name_for_save += '_' + \
                         str(round_to_n(rangevals[k, j], 8))
                 savename = execution_block.generate_unique_name(
-                    value_name_for_save) + '.yaml'
+                    value_name_for_save)
                 execution_block.params['experiment_type'] = savename
+                savename += '.yaml'
                 execution_block.write_yaml_file(waiting_room/savename)
     else:
         with open(filedata[key]['base_file'], 'r', encoding='utf-8') as p:
